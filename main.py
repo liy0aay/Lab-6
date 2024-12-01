@@ -1,88 +1,71 @@
-class File:
-    className = 'File'
+class Car:
+    className = 'Автомобиль'
     objectsCount = 0
 
-    def __init__(self, name, kbs, type):
-        self._name = name
-        self._kbs = kbs
-        self._type = type
-        File.objectsCount = File.objectsCount + 1
+    def __init__(self, tank_capacity, fuel_consumption, average_speed):
+        self._tank_capacity = tank_capacity # емкость бака в литрах
+        self._fuel_consumption = fuel_consumption # расход топлива на 100 км
+        self._average_speed = average_speed # средняя скорость в километрах
+        Car.objectsCount += 1
 
-    def get_name(self):
-        return self._name
+    def get_distance(self):
+        distance = (self._tank_capacity/self._fuel_consumption) * 100
+        print (f'Пройденное расстояние до полного опустошения бака: {distance:.2f} км')
 
-    def set_name(self, n):
-        self._name = n
 
-    def get_kbs(self):
-        return self._kbs
+class Truck(Car):
+    className = 'Грузовик'
 
-    def set_kbs(self, kbs):
-        if kbs > 0:
-            self._kbs = kbs
+    def __init__(self, tank_capacity, fuel_consumption, average_speed, weight_of_cargo):
+        super().__init__(tank_capacity, fuel_consumption, average_speed)
+        self._weight_of_cargo = weight_of_cargo # вес груза в кг
+
+    # метод 2: Соотношение веса груза к количеству топлива на 250 км  
+    def weight2fuel250(self):
+        fuel_needed250 = ((self._fuel_consumption/100) * 250)
+        return f'Соотношение веса груза к количеству топлива на 250 км: {self._weight_of_cargo/fuel_needed250}'
+    
+    # доп перегрузка оператора сложения, получаем новый объект и проверяем условия сложения
+    def __add__(self, other):
+        if isinstance(other, Truck):
+            return Truck(self._tank_capacity + other._tank_capacity,
+                        self._fuel_consumption + other._fuel_consumption,
+                        self._average_speed + other._average_speed,
+                        self._weight_of_cargo + other._weight_of_cargo)
+        raise TypeError('Сложение возможно только между объектами типа Truck')
+
+class Bus(Car):
+    className = 'Автобус'
+
+    def __init__(self, tank_capacity, fuel_consumption, average_speed, passengers_count):
+        super().__init__(tank_capacity, fuel_consumption, average_speed)
+        self._passengers_count = passengers_count
+
+    # метод 3: Соотношение числа пассажиров к количеству топлива на 250 км  
+    def passengers2fuel250(self):
+        fuel_needed250 = (self._fuel_consumption * 250) / 100
+        if self._passengers_count > 0:
+            print(f'Соотношение числа пассажиров к количеству топлива на 250 км: {self._passengers_count / fuel_needed250}')
         else:
-            self._kbs = 0.1
-
-    def type(self):
-        return self._type
-
-    def info(self):
-        print(self._name)
-        print(f"Размер: {self._kbs} кб")
-        print(f'Формат: {self._type}')
-
-    def kbsToBytes(self):
-        print(f'Размер в байтах: {self._kbs * 1024}')
+            print('Число пассажиров должно быть больше нуля!')
 
 
-class Image(File):
-    className = 'Image'
+car = Car(100, 25, 60)
+car.get_distance()
 
-    def __init__(self, name, kbs, type, height, width):
-        super().__init__(name, kbs, type)
-        self.height = height
-        self.width = width
-
-    def set_height(self, height):
-        if height > 0:
-            self.height = height
-        else:
-            self.height = 1
-
-    def set_width(self, width):
-        if width > 0:
-            self.width = width
-        else:
-            self.width = 1
-
-    def info(self):
-        super().info()
-        print(f'Тип: {Image.className}')
-        print(f"Высота (пкс): {self.height}")
-        print(f'Ширина (пкс): {self.width}')
-
-    def amount(self):
-        print(f'Площадь в пикселях: {self.height * self.width}')
-
-    def __eq__(self, other):
-        return self.height == other.height and self.width == other.width
+tr = Truck(100, 25, 60, 10000)
+print(tr.weight2fuel250())
 
 
-b = File("Объект класса " + File.className, 11, 'TXT')
-b.info()
-b.kbsToBytes()
+bus = Bus(100, 25, 60, 60)
+bus.passengers2fuel250()
 
-print('\n')
 
-im = Image('background.jpg', 44.1, 'JPG', 800, 600)
-im2 = Image('new_background.jpg', 42.8, 'JPG', 800, 600)
-
-im.amount()
-im.kbsToBytes()
-
-if (im == im2) is True:
-    print(f'{im.get_name()} и {im2.get_name()} равны.')
-else:
-    print(f'{im.get_name()} и {im2.get_name()} не равны.')
-
-print(f'Objects count: {File.objectsCount}')
+tr2 = Truck(200, 50, 50, 20000)
+result_truck = tr + tr2
+# атрибуты нового объекта н
+print("Новый грузовик после сложения:")
+print(f"\tЕмкость бака: {result_truck._tank_capacity} л")
+print(f"\tРасход топлива: {result_truck._fuel_consumption} л/100 км")
+print(f"\tСредняя скорость: {result_truck._average_speed} км/ч")
+print(f"\tВес груза: {result_truck._weight_of_cargo} кг")
